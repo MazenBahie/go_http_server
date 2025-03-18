@@ -1,0 +1,6 @@
+.vscode/
+
+.env
+
+go_http_server
+go_http_server.exe
