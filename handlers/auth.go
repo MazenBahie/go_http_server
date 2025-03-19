@@ -54,7 +54,6 @@ type LoginRequest struct {
 
 type LoginResponse struct {
 	Token string `json:"token"`
-	S     string `json:"s"`
 }
 
 func HandleLogin(db *sql.DB) http.HandlerFunc {
