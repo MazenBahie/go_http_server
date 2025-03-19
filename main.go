@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/MazenBahie/go_http_server/handlers"
+	"github.com/MazenBahie/go_http_server/middleware"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -53,6 +54,9 @@ func main() {
 	r.HandleFunc("/", handlers.HandleHome).Methods("GET")
 	r.HandleFunc("/error", handlers.HandleError)
 	r.HandleFunc("/signup", handlers.HandleSignUp(db)).Methods("POST")
+	r.HandleFunc("/login", handlers.HandleLogin(db)).Methods("POST")
+	r.HandleFunc("/llogin", middleware.AuthMiddleware(handlers.HandleLogin(db), true)).Methods("POST")
+	r.HandleFunc("/lllogin", middleware.AuthMiddleware(handlers.HandleLogin(db), false)).Methods("POST")
 
 	fmt.Println("Server is started on port => " + portStr)
 	http.ListenAndServe(":"+portStr, r)

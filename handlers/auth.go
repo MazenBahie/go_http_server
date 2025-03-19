@@ -3,10 +3,13 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
+	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/MazenBahie/go_http_server/models"
+	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -15,7 +18,7 @@ type signUpResult struct {
 	Role     string `json:"role"`
 }
 
-var jwtKey string = os.Getenv("JWT_SECRET")
+var jwtKey []byte = []byte(os.Getenv("JWT_SECRET"))
 
 func HandleSignUp(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -34,7 +37,6 @@ func HandleSignUp(db *sql.DB) http.HandlerFunc {
 		}
 		user.Password = string(hashedPassword)
 
-		// Insert into DB
 		res, err := db.Exec("INSERT INTO users (username, password, role) VALUES ($1, $2, $3)", user.Username, user.Password, user.Role)
 		if err != nil || res == nil {
 			ResponseWithError(w, http.StatusInternalServerError, "Error creating user "+err.Error())
@@ -47,3 +49,109 @@ func HandleSignUp(db *sql.DB) http.HandlerFunc {
 		})
 	}
 }
+
+type LoginRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type LoginResponse struct {
+	Token string `json:"token"`
+	S     string `json:"s"`
+}
+
+func HandleLogin(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var loginCreds LoginRequest
+		json.NewDecoder(r.Body).Decode(&loginCreds)
+
+		var storedUser models.User
+		err := db.QueryRow("SELECT id, username, password, role FROM users WHERE username = $1",
+			loginCreds.Username).Scan(&storedUser.ID, &storedUser.Username, &storedUser.Password, &storedUser.Role)
+
+		if err != nil {
+			ResponseWithError(w, http.StatusUnauthorized, "Invalid username or password")
+			return
+		}
+
+		// Compare passwords
+		err = bcrypt.CompareHashAndPassword([]byte(storedUser.Password), []byte(loginCreds.Password))
+		if err != nil {
+			http.Error(w, "Invalid email or password", http.StatusUnauthorized)
+			return
+		}
+
+		// Hardcoded secret key for testing
+		// secretKey := "NewSecretKey"
+		secretKey := os.Getenv("JWT_SECRET")
+
+		// Generate JWT Token
+		expirationTime := time.Now().Add(5 * time.Hour)
+		// claims := jwt.MapClaims{
+		// 	"username": storedUser.Username,
+		// 	"role":     storedUser.Role,
+		// 	"exp":      expirationTime.Unix(),
+		// }
+
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+			"username": storedUser.Username,
+			"role":     storedUser.Role,
+			"exp":      expirationTime.Unix(),
+		})
+		x := []byte(secretKey)
+		tokenString, err := token.SignedString(x)
+		if err != nil {
+			ResponseWithError(w, http.StatusInternalServerError, "Could not generate token: "+err.Error())
+			return
+		}
+
+		// Debugging logs
+		log.Println("Generated Token:", tokenString)
+		log.Println("JWT_SECRET used for signing:", secretKey)
+
+		// Return token in response
+		w.Header().Set("Authorization", "Bearer "+tokenString)
+		ResponseJson(w, http.StatusOK, LoginResponse{Token: tokenString})
+	}
+}
+
+// func HandleLogin(db *sql.DB) http.HandlerFunc {
+// 	return func(w http.ResponseWriter, r *http.Request) {
+// 		var loginCreds LoginRequest
+// 		json.NewDecoder(r.Body).Decode(&loginCreds)
+
+// 		var storedUser models.User
+// 		err := db.QueryRow("SELECT id, username, password, role FROM users WHERE username = $1", loginCreds.Username).Scan(&storedUser.ID, &storedUser.Username, &storedUser.Password, &storedUser.Role)
+// 		if err != nil {
+// 			ResponseWithError(w, http.StatusUnauthorized, "Invalid username or password")
+// 			return
+// 		}
+
+// 		// Compare passwords
+// 		err = bcrypt.CompareHashAndPassword([]byte(storedUser.Password), []byte(loginCreds.Password))
+// 		if err != nil {
+// 			http.Error(w, "Invalid email or password", http.StatusUnauthorized)
+// 			return
+// 		}
+
+// 		// Generate JWT Token
+// 		expirationTime := time.Now().Add(5 * time.Hour) // 1 hour expiration time for token
+// 		claims := &jwt.MapClaims{
+// 			"username": storedUser.Username,
+// 			"role":     storedUser.Role,
+// 			"exp":      expirationTime.Unix(),
+// 		}
+
+// 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+// 		// tokenString, err := token.SignedString(jwtKey)
+// 		tokenString, err := token.SignedString([]byte("NewSecretKey"))
+// 		if err != nil {
+// 			ResponseWithError(w, http.StatusInternalServerError, "Could not generate token:"+err.Error())
+// 			return
+// 		}
+
+// 		w.Header().Set("Authorization", "Bearer "+tokenString)
+
+// 		ResponseJson(w, http.StatusOK, LoginResponse{Token: tokenString, S: os.Getenv("JWT_SECRET")})
+// 	}
+// }
