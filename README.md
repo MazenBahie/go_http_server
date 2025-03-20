@@ -24,3 +24,7 @@ DBPath={{Your_DB_Connection_String}}
 
 5. create new db in postgresql `storedb`.
 6. exec `./go_http_server` to run application.
+
+## For testing application:
+
+use the provided postman collection.
