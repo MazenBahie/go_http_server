@@ -1,0 +1,221 @@
+{
+	"info": {
+		"_postman_id": "37a4baf4-c566-45a4-9c48-39d3b5627611",
+		"name": "go_http_server",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "32841489"
+	},
+	"item": [
+		{
+			"name": "auth",
+			"item": [
+				{
+					"name": "signUp",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\":\"maz9\",\r\n    \"password\":\"123\",\r\n    \"role\":\"admin\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/signup"
+					},
+					"response": []
+				},
+				{
+					"name": "login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\":\"maz9\",\r\n    \"password\":\"123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/login"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "credit cards",
+			"item": [
+				{
+					"name": "add credit",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDI0NDI0MjcsInJvbGUiOiJhZG1pbiIsInVzZXJuYW1lIjoibWF6OSJ9.aTA4HljjZEFounxFRdfR0jDnCFbzWRShzeY6DpM_lgE",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"card 1\",\r\n    \"card_number\": \"123123123123\",\r\n    \"cvv\": \"123\",\r\n     \"expiration_date\": \"2027-04-18T14:30:00Z\",\r\n    \"user_id\": 2\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/credit"
+					},
+					"response": []
+				},
+				{
+					"name": "delete card",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDI0NDI0MjcsInJvbGUiOiJhZG1pbiIsInVzZXJuYW1lIjoibWF6OSJ9.aTA4HljjZEFounxFRdfR0jDnCFbzWRShzeY6DpM_lgE",
+								"type": "text"
+							}
+						],
+						"url": "{{url}}/credit/2"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "products",
+			"item": [
+				{
+					"name": "create product",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDI0NDI0MjcsInJvbGUiOiJhZG1pbiIsInVzZXJuYW1lIjoibWF6OSJ9.aTA4HljjZEFounxFRdfR0jDnCFbzWRShzeY6DpM_lgE",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"product 1\",\r\n    \"price\": 2220.32,\r\n    \"description\": \"temp description\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/products"
+					},
+					"response": []
+				},
+				{
+					"name": "get products",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDI0NDI0MjcsInJvbGUiOiJhZG1pbiIsInVzZXJuYW1lIjoibWF6OSJ9.aTA4HljjZEFounxFRdfR0jDnCFbzWRShzeY6DpM_lgE",
+								"type": "text"
+							}
+						],
+						"url": "{{url}}/products"
+					},
+					"response": []
+				},
+				{
+					"name": "update product",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDI0NDI0MjcsInJvbGUiOiJhZG1pbiIsInVzZXJuYW1lIjoibWF6OSJ9.aTA4HljjZEFounxFRdfR0jDnCFbzWRShzeY6DpM_lgE",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 1,\r\n    \"name\": \"product 1\",\r\n    \"price\": 220,\r\n    \"description\": \"temp description after update\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}/products/1"
+					},
+					"response": []
+				},
+				{
+					"name": "delete product",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDI0NDI0MjcsInJvbGUiOiJhZG1pbiIsInVzZXJuYW1lIjoibWF6OSJ9.aTA4HljjZEFounxFRdfR0jDnCFbzWRShzeY6DpM_lgE",
+								"type": "text"
+							}
+						],
+						"url": "{{url}}/products/1"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "test server",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "{{url}}"
+			},
+			"response": []
+		},
+		{
+			"name": "test error",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": "{{url}}/error"
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "url",
+			"value": "http://localhost:8080",
+			"type": "default"
+		}
+	]
+}

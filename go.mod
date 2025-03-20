@@ -13,6 +13,7 @@ require (
 require (
 	github.com/go-playground/validator/v10 v10.25.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
+	github.com/stripe/stripe-go/v81 v81.4.0
 )
 
 require (
