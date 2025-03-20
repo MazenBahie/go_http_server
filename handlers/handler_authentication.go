@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/MazenBahie/go_http_server/models"
+	"github.com/go-playground/validator/v10"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -17,13 +18,25 @@ type signUpResult struct {
 	Role     string `json:"role"`
 }
 
+type signUpRequest struct {
+	Username string `json:"username" validate:"required"`
+	Password string `json:"password" validate:"required"`
+	Role     string `json:"role" validate:"required,oneof=admin user"`
+}
+
 func HandleSignUp(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		user := models.User{}
+		user := signUpRequest{}
 
 		err := json.NewDecoder(r.Body).Decode(&user)
 		if err != nil {
 			JsonParsingErrorBadRequest(w, err.Error())
+			return
+		}
+
+		err = Val.Struct(user)
+		if err != nil {
+			ResponseWithError(w, http.StatusBadRequest, "Validation error: "+err.Error())
 			return
 		}
 
@@ -47,9 +60,11 @@ func HandleSignUp(db *sql.DB) http.HandlerFunc {
 	}
 }
 
+var Val *validator.Validate
+
 type LoginRequest struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username string `json:"username" validate:"required"`
+	Password string `json:"password" validate:"required"`
 }
 
 type LoginResponse struct {
@@ -58,11 +73,18 @@ type LoginResponse struct {
 
 func HandleLogin(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var loginCreds LoginRequest
+
+		loginCreds := LoginRequest{}
 		json.NewDecoder(r.Body).Decode(&loginCreds)
 
+		err := Val.Struct(loginCreds)
+		if err != nil {
+			ResponseWithError(w, http.StatusBadRequest, "Validation error: "+err.Error())
+			return
+		}
+
 		var storedUser models.User
-		err := db.QueryRow("SELECT id, username, password, role FROM users WHERE username = $1",
+		err = db.QueryRow("SELECT id, username, password, role FROM users WHERE username = $1",
 			loginCreds.Username).Scan(&storedUser.ID, &storedUser.Username, &storedUser.Password, &storedUser.Role)
 
 		if err != nil {

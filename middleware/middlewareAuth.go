@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -31,7 +30,6 @@ func AuthMiddleware(next http.Handler, adminOnly bool) http.HandlerFunc {
 		})
 
 		if err != nil {
-			log.Println("Error parsing token:", err)
 			handlers.ResponseWithError(w, http.StatusUnauthorized, "Invalid token")
 			return
 		}

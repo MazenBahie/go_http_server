@@ -10,6 +10,7 @@ import (
 
 	"github.com/MazenBahie/go_http_server/handlers"
 	"github.com/MazenBahie/go_http_server/middleware"
+	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -48,15 +49,38 @@ func main() {
 
 	fmt.Println("Database connection established")
 
+	fmt.Println("Initializing dependencies...")
+	// Initialize the validators
+	handlers.Val = validator.New()
+
 	fmt.Println("mapping routes...")
 	r := mux.NewRouter()
 
-	r.HandleFunc("/", handlers.HandleHome).Methods("GET")
+	r.HandleFunc("/", handlers.HandleHome).Methods(http.MethodGet)
 	r.HandleFunc("/error", handlers.HandleError)
-	r.HandleFunc("/signup", handlers.HandleSignUp(db)).Methods("POST")
-	r.HandleFunc("/login", handlers.HandleLogin(db)).Methods("POST")
-	r.HandleFunc("/llogin", middleware.AuthMiddleware(handlers.HandleLogin(db), true)).Methods("POST")
-	r.HandleFunc("/lllogin", middleware.AuthMiddleware(handlers.HandleLogin(db), false)).Methods("POST")
+	r.HandleFunc("/signup", handlers.HandleSignUp(db)).Methods(http.MethodPost)
+	r.HandleFunc("/login", handlers.HandleLogin(db)).Methods(http.MethodPost)
+
+	//credit card routes
+	r.HandleFunc("/credit", middleware.AuthMiddleware(handlers.HandleAddCreditCard(db), false)).Methods(http.MethodPost)
+	r.HandleFunc("/credit/{card_id}", middleware.AuthMiddleware(handlers.HandleDeleteCreditCard(db), false)).
+		Methods(http.MethodDelete)
+
+	//product routes
+	r.HandleFunc("/products", middleware.AuthMiddleware(handlers.HandleGetProducts(db), false)).
+		Methods(http.MethodGet)
+
+	// admin products routes
+	r.HandleFunc("/products/{product_id}", middleware.AuthMiddleware(handlers.HandleUpdateProduct(db), true)).
+		Methods(http.MethodPut)
+	r.HandleFunc("/products/{product_id}", middleware.AuthMiddleware(handlers.HandleDeleteProduct(db), true)).
+		Methods(http.MethodDelete)
+
+	r.HandleFunc("/products", middleware.AuthMiddleware(handlers.HandleCreateProduct(db), true)).
+		Methods(http.MethodPost)
+
+	r.HandleFunc("/llogin", middleware.AuthMiddleware(handlers.HandleLogin(db), true)).Methods(http.MethodPost)
+	r.HandleFunc("/lllogin", middleware.AuthMiddleware(handlers.HandleLogin(db), false)).Methods(http.MethodPost)
 
 	fmt.Println("Server is started on port => " + portStr)
 	http.ListenAndServe(":"+portStr, r)
